@@ -14,3 +14,4 @@ numpy
 typer
 openai
 datasets >= 2.21.0
+docker

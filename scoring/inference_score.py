@@ -48,7 +48,8 @@ def wrap_inference_score(request: EvaluateModelRequest):
         download_dir=MODEL_CACHE_DIR,
     )
 
-    vibe_result = get_vibe_match_score(request, model)
+    # vibe_result = get_vibe_match_score(request, model)
+    vibe_result = 0
     coherence_result = get_coherence_score(request, model)
     inference_result = vibe_result | coherence_result
 

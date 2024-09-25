@@ -59,6 +59,10 @@ def coherence_evaluator(generated_text: str):
             model=COHERENCE_EVAL_MODEL,
         )
         score = int(chat_completion.choices[0].message.content)
+
+        print(evaluation_text)
+        print(f"Score: {score}")
+
         return score
     except Exception as e:
         print(e)

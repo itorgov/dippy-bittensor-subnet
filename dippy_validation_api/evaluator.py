@@ -256,7 +256,7 @@ def entry():
         # scores_data.latency_score = eval_result.latency_score
         # scores_data.creativity_score = eval_result.creativity_score
         # scores_data.llm_size_score = eval_result.eval_model_size_score
-        # scores_data.vibe_score = infrence_result.vibe_score
+        scores_data.vibe_score = infrence_result.vibe_score
         scores_data.coherence_score = infrence_result.coherence_score
 
         # final_eval_score = (
@@ -268,12 +268,12 @@ def entry():
         # )
         # final_model_size_score = scores_data.llm_size_score * 0.06
         # final_latency_score = scores_data.latency_score * 0.06
-        # final_vibe_score = scores_data.vibe_score * 0.06
+        final_vibe_score = scores_data.vibe_score * 0.06
         #
         # total_score = final_eval_score + final_model_size_score + final_latency_score + final_vibe_score
         # print(f"final_model_size_score {final_model_size_score}")
         # print(f"final_latency_score {final_latency_score}")
-        # print(f"final_vibe_score {final_vibe_score}")
+        print(f"final_vibe_score {final_vibe_score}")
         # print(f"final_eval_score {final_eval_score}")
         print(f"coherence score: {scores_data.coherence_score}")
         # print(f"score pre coherence: {total_score}")

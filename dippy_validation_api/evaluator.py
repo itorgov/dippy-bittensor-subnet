@@ -245,39 +245,39 @@ def entry():
             raise Exception(infrence_result.error)
         print(f"infrence_result : {infrence_result}")
 
-        # eval_result = evaler.eval_score(req)
-        # print(f"eval_result : {eval_result}")
-        # if isinstance(eval_result, RunError):
-        #     raise Exception(eval_result.error)
+        eval_result = evaler.eval_score(req)
+        print(f"eval_result : {eval_result}")
+        if isinstance(eval_result, RunError):
+            raise Exception(eval_result.error)
         
 
         scores_data = Scores()
-        # scores_data.qualitative_score = eval_result.eval_score
-        # scores_data.latency_score = eval_result.latency_score
-        # scores_data.creativity_score = eval_result.creativity_score
-        # scores_data.llm_size_score = eval_result.eval_model_size_score
+        scores_data.qualitative_score = eval_result.eval_score
+        scores_data.latency_score = eval_result.latency_score
+        scores_data.creativity_score = eval_result.creativity_score
+        scores_data.llm_size_score = eval_result.eval_model_size_score
         scores_data.vibe_score = infrence_result.vibe_score
         scores_data.coherence_score = infrence_result.coherence_score
 
-        # final_eval_score = (
-        #     scores_data.adjusted_q_score(
-        #         scores_data.qualitative_score,
-        #         scores_data.creativity_score,
-        #     )
-        #     * 0.82
-        # )
-        # final_model_size_score = scores_data.llm_size_score * 0.06
-        # final_latency_score = scores_data.latency_score * 0.06
+        final_eval_score = (
+            scores_data.adjusted_q_score(
+                scores_data.qualitative_score,
+                scores_data.creativity_score,
+            )
+            * 0.82
+        )
+        final_model_size_score = scores_data.llm_size_score * 0.06
+        final_latency_score = scores_data.latency_score * 0.06
         final_vibe_score = scores_data.vibe_score * 0.06
-        #
-        # total_score = final_eval_score + final_model_size_score + final_latency_score + final_vibe_score
-        # print(f"final_model_size_score {final_model_size_score}")
-        # print(f"final_latency_score {final_latency_score}")
+
+        total_score = final_eval_score + final_model_size_score + final_latency_score + final_vibe_score
+        print(f"final_model_size_score {final_model_size_score}")
+        print(f"final_latency_score {final_latency_score}")
         print(f"final_vibe_score {final_vibe_score}")
-        # print(f"final_eval_score {final_eval_score}")
+        print(f"final_eval_score {final_eval_score}")
         print(f"coherence score: {scores_data.coherence_score}")
-        # print(f"score pre coherence: {total_score}")
-        # print(f"total score: {scores_data.calculate_total_score()}")
+        print(f"score pre coherence: {total_score}")
+        print(f"total score: {scores_data.calculate_total_score()}")
     except Exception as e:
         print(e)
 

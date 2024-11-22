@@ -26,7 +26,7 @@ from typing import List, Any
 def calculate_vibe_match_score(
     model: LLM, 
     sampled_data: list[tuple],
-    verbose: bool = False
+    verbose: bool = True
 ):
     
     contexts, last_user_messages, expected_outputs = zip(*sampled_data)
@@ -52,6 +52,14 @@ def calculate_vibe_match_score(
 
         decoded_messages.extend([output.outputs[0].text for output in outputs])
 
+        if verbose:
+            print("##############################################")
+            if contexts:
+                print(f"Context: {contexts[i]}")
+            if expected_outputs:
+                print(f"Expected output: {expected_outputs[i]}")
+            print("##############################################")
+
     vibe_scores = []
     # calculate the vibe score
     for last_user_message, decoded in zip(last_user_messages, decoded_messages):
@@ -68,16 +76,10 @@ def calculate_vibe_match_score(
         vibe_scores.append(decoded_len_score)
         if verbose:
             print("##############################################")
-            if contexts:
-                print(f"Context: {contexts[i]}")
             print(f"Last user message: {last_user_message}")
             print(f"Generated text: {decoded}")
-            if expected_outputs:
-                print(f"Expected output: {expected_outputs[i]}")
-
             print(f"Vibe score: {decoded_len_score}")
             print("##############################################")
-        i += 1
 
     return sum(vibe_scores) / len(vibe_scores)
 

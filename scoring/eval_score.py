@@ -383,10 +383,25 @@ def eval_score_batch(
                         [torch.zeros_like(inputs["attention_mask"]), targets["attention_mask"]],
                         dim=1,
                     )
+
+                    print("------------")
+                    print(f"Batch #{i}")
+                    full_input_ids_list = input_ids.tolist()
+                    full_input_ids_str = str(full_input_ids_list)
+                    full_input_ids_hash_object = hashlib.sha256(full_input_ids_str.encode())
+                    full_input_ids_hash_hash = full_input_ids_hash_object.hexdigest()
+
+                    print(f"Hash: {full_input_ids_hash_hash}")
+                    print(f"Input ids: {str(input_ids.tolist())}")
+                    print(f"Target ids mask: {str(targets_ids_mask.tolist())}")
+
                     targets_ids_mask = torch.cat(
                         [torch.zeros_like(targets_ids_mask[:, :1]), targets_ids_mask[:, :-1]],
                         dim=1,
                     )
+
+                    print(f"Target ids mask with shift: {str(targets_ids_mask.tolist())}")
+                    print("------------")
 
                     outputs = model(
                         input_ids=input_ids,

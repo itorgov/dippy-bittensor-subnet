@@ -1,4 +1,5 @@
 import gc
+import hashlib
 import os
 from typing import Any
 import tqdm
@@ -165,6 +166,17 @@ def eval_score(
                 [torch.zeros_like(inputs["attention_mask"]), targets["attention_mask"]],
                 dim=1,
             )
+
+            print("------------")
+            print(f"Batch #{i}")
+            full_input_ids_list = input_ids.tolist()
+            full_input_ids_str = str(full_input_ids_list)
+            full_input_ids_hash_object = hashlib.sha256(full_input_ids_str.encode())
+            full_input_ids_hash_hash = full_input_ids_hash_object.hexdigest()
+
+            print(f"Hash: {full_input_ids_hash_hash}")
+            print(f"Target ids mask: {str(targets_ids_mask.tolist())}")
+            print("------------")
 
             # shift the output mask to the right by one to get the corresponding predicted logits
             targets_ids_mask = torch.cat(

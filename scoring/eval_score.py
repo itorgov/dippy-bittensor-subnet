@@ -176,13 +176,15 @@ def eval_score(
 
             print(f"Hash: {full_input_ids_hash_hash}")
             print(f"Target ids mask: {str(targets_ids_mask.tolist())}")
-            print("------------")
 
             # shift the output mask to the right by one to get the corresponding predicted logits
             targets_ids_mask = torch.cat(
                 [torch.zeros_like(targets_ids_mask[:, :1]), targets_ids_mask[:, :-1]],
                 dim=1,
             )
+
+            print(f"Target ids mask with shift: {str(targets_ids_mask.tolist())}")
+            print("------------")
 
             # Get model predictions (logits)
             try:

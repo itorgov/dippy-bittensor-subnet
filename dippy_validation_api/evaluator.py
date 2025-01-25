@@ -249,16 +249,17 @@ def entry():
         # evaler = Evaluator(image_name=image_name, trace=True, gpu_ids="0")
         evaler = Evaluator(image_name=image_name, trace=True, gpu_ids="0")
 
-        infrence_result = evaler.inference_score(req)
-        if isinstance(infrence_result, RunError):
-            raise Exception(infrence_result.error)
-        print(f"infrence_result : {infrence_result}")
+        # infrence_result = evaler.inference_score(req)
+        # if isinstance(infrence_result, RunError):
+        #     raise Exception(infrence_result.error)
+        # print(f"infrence_result : {infrence_result}")
 
         # Override inference result with hardcoded values for testing
-        # infrence_result  = InferenceScore(
-        #         vibe_score=0.5,
-        #         coherence_score=1,
-        # )
+        infrence_result  = InferenceScore(
+            vibe_score=0.6,
+            coherence_score=0.955,
+        )
+        print(f"infrence_result : {infrence_result}")
 
         eval_result = evaler.eval_score(req)
         print(f"eval_result : {eval_result}")

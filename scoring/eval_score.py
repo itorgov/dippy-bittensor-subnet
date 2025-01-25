@@ -16,7 +16,7 @@ from scoring.common import (
     EvaluateModelRequest,
 )
 
-BATCH_SIZE = 2
+BATCH_SIZE = 1
 max_entropy = math.log(VOCAB_TRUNCATION)
 
 
@@ -325,6 +325,7 @@ def eval_score_batch(
 
     num_gpus = torch.cuda.device_count()
     batch_size = BATCH_SIZE * num_gpus  # Increase batch size proportionally to GPU count
+    debug_printed = False
 
     model.eval()
     with torch.no_grad():
@@ -373,6 +374,14 @@ def eval_score_batch(
                         [torch.zeros_like(targets_ids_mask[:, :1]), targets_ids_mask[:, :-1]],
                         dim=1,
                     )
+
+                    if not debug_printed:
+                        print("------ DEBUG PRINTS ------")
+                        print(f"input_ids: {input_ids.to_list()}")
+                        print(f"attention_mask: {attention_mask.to_list()}")
+                        print(f"targets_ids_mask: {targets_ids_mask.to_list()}")
+                        print("------ DEBUG PRINTS ------")
+                        debug_printed = True
 
                     outputs = model(
                         input_ids=input_ids,

@@ -377,9 +377,9 @@ def eval_score_batch(
 
                     if not debug_printed:
                         print("------ DEBUG PRINTS ------")
-                        print(f"input_ids: {input_ids.to_list()}")
-                        print(f"attention_mask: {attention_mask.to_list()}")
-                        print(f"targets_ids_mask: {targets_ids_mask.to_list()}")
+                        print(f"input_ids: {input_ids.tolist()}")
+                        print(f"attention_mask: {attention_mask.tolist()}")
+                        print(f"targets_ids_mask: {targets_ids_mask.tolist()}")
                         print("------ DEBUG PRINTS ------")
                         debug_printed = True
 

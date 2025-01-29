@@ -10,7 +10,14 @@ from typing import Optional, Union, Dict, Any
 
 from scoring.common import EvaluateModelRequest
 from utilities.event_logger import EventLogger
-from common.scores import Scores
+
+from common.scores import (
+    Scores,
+    QUALITATIVE_SCORE_WEIGHT,
+    LATENCY_SCORE_WEIGHT,
+    VIBE_SCORE_WEIGHT,
+)
+import os
 
 DEFAULT_IMAGE_NAME = "grader:latest"
 
@@ -272,14 +279,12 @@ def entry():
                 scores_data.qualitative_score,
                 scores_data.creativity_score,
             )
-            * 0.82
+            * QUALITATIVE_SCORE_WEIGHT
         )
-        final_model_size_score = scores_data.llm_size_score * 0.06
-        final_latency_score = scores_data.latency_score * 0.06
-        final_vibe_score = scores_data.vibe_score * 0.06
+        final_latency_score = scores_data.latency_score * LATENCY_SCORE_WEIGHT
+        final_vibe_score = scores_data.vibe_score * VIBE_SCORE_WEIGHT
 
-        total_score = final_eval_score + final_model_size_score + final_latency_score + final_vibe_score
-        print(f"final_model_size_score {final_model_size_score}")
+        total_score = final_eval_score + final_latency_score + final_vibe_score
         print(f"final_latency_score {final_latency_score}")
         print(f"final_vibe_score {final_vibe_score}")
         print(f"final_eval_score {final_eval_score}")

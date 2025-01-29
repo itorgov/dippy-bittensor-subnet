@@ -105,10 +105,10 @@ def _model_evaluation_step(queue_id, duplicate: bool = False):
     if request is None:  # Sentinel value to exit the process
         logger.info("No more models to evaluate. Sleep for 15 seconds before checking again.")
         return
-    app.state.event_logger.info(f"Model evaluation queued: {request} {queue_id}")
+    queued_message = f"Model evaluation queued: {request} {queue_id}"
+    print(queued_message)
+    app.state.event_logger.info(queued_message)
     try:
-        if duplicate:
-            _duplicate_model(request)
         result = _evaluate_model(request, queue_id)
         if result is None:
             result = {"note": "incoherent model"}
@@ -127,23 +127,15 @@ def get_next_model_to_eval():
 
     if response is None:
         return None
-    return EvaluateModelRequest(
+    request = EvaluateModelRequest(
         repo_namespace=response["repo_namespace"],
         repo_name=response["repo_name"],
         chat_template_type=response["chat_template_type"],
         hash=response["hash"],
     )
+    return request
 
 
-def _duplicate_model(request: EvaluateModelRequest):
-    try:
-        duplicate(request.repo_namespace, request.repo_name)
-    except Exception as e:
-        supabaser.update_leaderboard_status(
-            request.hash,
-            "FAILED",
-            f"model error : {e}",
-        )
 
 
 GPU_ID_MAP = {
@@ -363,10 +355,7 @@ async def event_report(event_data: EventData):
         return Response(status_code=200)
     except Exception as e:
         if app.state.event_logger_enabled:
-            error_details = {
-                "error": str(e),
-                "traceback": traceback.format_exc()
-            }
+            error_details = {"error": str(e), "traceback": traceback.format_exc()}
             app.state.event_logger.error("failed_event_request", extra=error_details)
         return Response(status_code=400, content={"error": str(e)})
 
@@ -481,6 +470,15 @@ def update_failure(new_entry, failure_notes):
     if new_entry["status"] == StatusEnum.FAILED:
         return new_entry
     new_entry["status"] = StatusEnum.FAILED
+    new_entry["notes"] = failure_notes
+    return new_entry
+
+
+def update_completed(new_entry, failure_notes):
+    # noop if already marked failed
+    if new_entry["status"] == StatusEnum.FAILED:
+        return new_entry
+    new_entry["status"] = StatusEnum.COMPLETED
     new_entry["notes"] = failure_notes
     return new_entry
 
@@ -632,7 +630,7 @@ def check_or_create_model(
             f"Given entry {new_entry_dict} has conflicting model_hash with existing record {existing_record}"
         )
         logger.error(failure_notes)
-        new_entry_dict = update_failure(new_entry_dict, failure_notes)
+        new_entry_dict = update_completed(new_entry_dict, failure_notes)
         return supabaser.upsert_and_return(new_entry_dict, request.hash)
 
     return supabaser.upsert_and_return(new_entry_dict, request.hash)
@@ -640,6 +638,7 @@ def check_or_create_model(
 
 def upsert_row_supabase(row):
     app.state.supabase_client.table("leaderboard").upsert(row).execute()
+
 
 @app.get("/hc")
 def hc():
@@ -685,16 +684,9 @@ def start():
     try:
         logger.info(f"Starting {num_queues} evaluation threads")
         processes = start_staggered_queues(num_queues, stagger_seconds)
+        uvicorn.run(app, host="0.0.0.0", port=MAIN_API_PORT)
         
-        if not args.worker:
-            logger.info("Starting API server")
-            uvicorn.run(app, host="0.0.0.0", port=MAIN_API_PORT)
-        else:
-            logger.info("Running in worker mode - API server disabled")
-            # Keep the main process running
-            while True:
-                time.sleep(60)
-                
+
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, stopping...")
     except Exception as e:

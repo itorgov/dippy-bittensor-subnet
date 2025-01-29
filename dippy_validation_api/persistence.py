@@ -105,7 +105,7 @@ class SupabaseState:
     def get_json_result(self, hash):
         try:
             response = self.client.table("leaderboard").select("*").eq("hash", hash).execute()
-            if len(response.data) > 0:                
+            if len(response.data) > 0:
                 result = {
                     "score": {
                         "model_size_score": response.data[0]["model_size_score"],
@@ -190,16 +190,18 @@ class SupabaseState:
     def get_next_model_to_eval(self):
         try:
             response = (
-                self.client.table("leaderboard")
-                .select("*")
-                .eq("status", "QUEUED")
-                .order("timestamp", desc=False)
-                .limit(1)
+                self.client.table("minerboard")
+                .select("*, leaderboard(*)")
+                .order("block", desc=False)
                 .execute()
             )
             if len(response.data) == 0:
                 return None
-            return response.data[0]
+            # Filter for only QUEUED status entries
+            queued_entries = [entry for entry in response.data if entry.get('leaderboard', {}).get('status') == 'QUEUED']
+            if len(queued_entries) == 0:
+                return None
+            return queued_entries[0]['leaderboard']
         except Exception as e:
             self.logger.error(f"Error fetching next model to evaluate: {e}")
             return None

@@ -10,13 +10,19 @@ from typing import Optional, Union, Dict, Any
 
 from scoring.common import EvaluateModelRequest
 from utilities.event_logger import EventLogger
-from common.scores import Scores
+
+from common.scores import (
+    Scores,
+    QUALITATIVE_SCORE_WEIGHT,
+    LATENCY_SCORE_WEIGHT,
+    VIBE_SCORE_WEIGHT,
+)
+import os
 
 DEFAULT_IMAGE_NAME = "grader:latest"
 
 DEFAULT_HOME_DIR = os.environ.get("EVALUATOR_HOME_DIR", "/home/new_prod_user/dippy-bittensor-subnet")
 DEFAULT_MODEL_CACHE_DIR = os.environ.get("EVALUATOR_MODEL_CACHE_DIR", "/workdir/model_cache_dir")
-
 
 class EvaluationScore(BaseModel):
     eval_score: float
@@ -98,6 +104,7 @@ class Evaluator:
             "HF_TOKEN": os.environ.get("HF_TOKEN"),
             "VLLM_WORKER_MULTIPROC_METHOD": "_",
             "PYTORCH_CUDA_ALLOC_CONF": "_",
+            "DATASET_API_JWT": os.environ.get("DATASET_API_JWT"),
             "DATASET_API_KEY": os.environ.get("DATASET_API_KEY"),
         }
         self.trace = trace
@@ -138,7 +145,7 @@ class Evaluator:
         filepath = f"/tmp/{job_type}_output.json"
         filename = f"{job_type}_output.json"
 
-        print("now waiting for container to complete")
+        print(f"now waiting for container image {self.image_name} with command {command} to complete")
         result = container.wait()
         self.logger.debug(f"container_run_complete, {result}")
         print(f"container_run_complete, {result}")
@@ -252,12 +259,6 @@ def entry():
         infrence_result = evaler.inference_score(req)
         if isinstance(infrence_result, RunError):
             raise Exception(infrence_result.error)
-
-        # Override inference result with hardcoded values for testing
-        # infrence_result  = InferenceScore(
-        #     vibe_score=0.6,
-        #     coherence_score=0.955,
-        # )
         print(f"infrence_result : {infrence_result}")
 
         eval_result = evaler.eval_score(req)
@@ -278,14 +279,12 @@ def entry():
                 scores_data.qualitative_score,
                 scores_data.creativity_score,
             )
-            * 0.82
+            * QUALITATIVE_SCORE_WEIGHT
         )
-        final_model_size_score = scores_data.llm_size_score * 0.06
-        final_latency_score = scores_data.latency_score * 0.06
-        final_vibe_score = scores_data.vibe_score * 0.06
+        final_latency_score = scores_data.latency_score * LATENCY_SCORE_WEIGHT
+        final_vibe_score = scores_data.vibe_score * VIBE_SCORE_WEIGHT
 
-        total_score = final_eval_score + final_model_size_score + final_latency_score + final_vibe_score
-        print(f"final_model_size_score {final_model_size_score}")
+        total_score = final_eval_score + final_latency_score + final_vibe_score
         print(f"final_latency_score {final_latency_score}")
         print(f"final_vibe_score {final_vibe_score}")
         print(f"final_eval_score {final_eval_score}")

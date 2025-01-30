@@ -60,6 +60,12 @@ def coherence_evaluator(generated_text: str):
             temperature=0,
         )
         score = int(chat_completion.choices[0].message.content)
+
+        if score == 0:
+            print("--------------------")
+            print(generated_text)
+            print("--------------------")
+
         return score
     except Exception as e:
         print(e)

@@ -60,12 +60,6 @@ def coherence_evaluator(generated_text: str):
             temperature=0,
         )
         score = int(chat_completion.choices[0].message.content)
-
-        if score == 0:
-            print("--------------------")
-            print(generated_text)
-            print("--------------------")
-
         return score
     except Exception as e:
         print(e)
@@ -208,8 +202,8 @@ def calculate_coherence_score(model: LLM, dataset_formatter, messages, verbose=F
     for i, convo in enumerate(evaluation_conversations):
         try:
             coherence_score = coherence_evaluator(convo)
-            scored_convos.append(pretty_convo(generated_samples[i], coherence_score))
             if coherence_score < 1:
+                scored_convos.append(pretty_convo(generated_samples[i], coherence_score))
                 penalty += 1
         except Exception as e:
             exceptions += 1
